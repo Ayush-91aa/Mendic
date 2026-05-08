@@ -1,4 +1,17 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bruno+Ace+SC&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* 
+  If you download the exact "Nasalization" font file (.ttf or .woff2), 
+  place it in your public/fonts/ folder and uncomment this:
+
+  @font-face {
+    font-family: 'Nasalization';
+    src: url('/fonts/nasalization-rg.woff2') format('woff2'),
+         url('/fonts/nasalization-rg.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
+*/
 
 @tailwind base;
 @tailwind components;

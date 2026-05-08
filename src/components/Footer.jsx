@@ -16,7 +16,7 @@ export default function Footer() {
               <div className="w-9 h-9 bg-primary-500 rounded-xl flex items-center justify-center">
                 <Wrench className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold">Device<span className="text-primary-400">cure</span></span>
+              <span className="text-2xl font-nasalization tracking-wide" style={{ color: '#F45D40' }}>MENDIC</span>
             </a>
             <p className="text-gray-400 text-sm leading-relaxed">
               India's trusted doorstep mobile phone repair service. Fast, reliable, and hassle-free repairs at your convenience.
