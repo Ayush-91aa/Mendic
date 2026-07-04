@@ -1,13 +1,4 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import {
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signInWithPopup,
-  signOut,
-  updateProfile,
-} from 'firebase/auth';
-import { auth, googleProvider } from '../firebase';
 
 const AuthContext = createContext();
 
@@ -20,36 +11,90 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   function signup(email, password, displayName) {
-    return createUserWithEmailAndPassword(auth, email, password).then(
-      (result) => {
-        return updateProfile(result.user, { displayName });
+    return new Promise((resolve, reject) => {
+      try {
+        const users = JSON.parse(localStorage.getItem('users') || '[]');
+        if (users.some(u => u.email === email)) {
+          const err = new Error('Email already registered');
+          err.code = 'auth/email-already-in-use';
+          return reject(err);
+        }
+        const newUser = {
+          uid: 'user_' + Math.random().toString(36).substr(2, 9),
+          email,
+          displayName,
+        };
+        users.push({ ...newUser, password });
+        localStorage.setItem('users', JSON.stringify(users));
+        localStorage.setItem('currentUser', JSON.stringify(newUser));
+        setCurrentUser(newUser);
+        resolve(newUser);
+      } catch (err) {
+        reject(err);
       }
-    );
+    });
   }
 
   function login(email, password) {
-    return signInWithEmailAndPassword(auth, email, password);
+    return new Promise((resolve, reject) => {
+      try {
+        const users = JSON.parse(localStorage.getItem('users') || '[]');
+        const user = users.find(u => u.email === email);
+        if (!user) {
+          const err = new Error('No account found');
+          err.code = 'auth/user-not-found';
+          return reject(err);
+        }
+        if (user.password !== password) {
+          const err = new Error('Invalid password');
+          err.code = 'auth/wrong-password';
+          return reject(err);
+        }
+        const loggedUser = {
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+        };
+        localStorage.setItem('currentUser', JSON.stringify(loggedUser));
+        setCurrentUser(loggedUser);
+        resolve(loggedUser);
+      } catch (err) {
+        reject(err);
+      }
+    });
   }
 
   function loginWithGoogle() {
-    return signInWithPopup(auth, googleProvider);
+    return new Promise((resolve) => {
+      const googleUser = {
+        uid: 'google_' + Math.random().toString(36).substr(2, 9),
+        email: 'googleuser@gmail.com',
+        displayName: 'Google User',
+      };
+      localStorage.setItem('currentUser', JSON.stringify(googleUser));
+      setCurrentUser(googleUser);
+      resolve(googleUser);
+    });
   }
 
   function logout() {
-    return signOut(auth);
+    return new Promise((resolve) => {
+      localStorage.removeItem('currentUser');
+      setCurrentUser(null);
+      resolve();
+    });
   }
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
-      setLoading(false);
-    });
-    // Fallback: if Firebase doesn't respond in 3s, stop loading anyway
-    const timeout = setTimeout(() => setLoading(false), 3000);
-    return () => {
-      unsubscribe();
-      clearTimeout(timeout);
-    };
+    const userStr = localStorage.getItem('currentUser');
+    if (userStr) {
+      try {
+        setCurrentUser(JSON.parse(userStr));
+      } catch (e) {
+        console.error('Error parsing cached user:', e);
+      }
+    }
+    setLoading(false);
   }, []);
 
   const value = {
@@ -67,3 +112,4 @@ export function AuthProvider({ children }) {
     </AuthContext.Provider>
   );
 }
+
