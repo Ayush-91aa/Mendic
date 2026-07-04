@@ -1,6 +1,4 @@
 import { useEffect, useState } from 'react';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../firebase';
 import { useAuth } from '../../context/AuthContext';
 import { CheckCircle, Phone, MapPin, Calendar, Wrench, Loader2 } from 'lucide-react';
 
@@ -11,9 +9,12 @@ export default function StepConfirmation({ booking, onClose }) {
   const { currentUser } = useAuth();
 
   useEffect(() => {
+    let timer;
     const saveBooking = async () => {
       try {
-        await addDoc(collection(db, 'bookings'), {
+        const bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+        const newBooking = {
+          id: 'booking_' + Math.random().toString(36).substr(2, 9),
           brand: booking.brand?.name || '',
           model: booking.model || '',
           issues: booking.issues.map(i => i.name),
@@ -26,17 +27,26 @@ export default function StepConfirmation({ booking, onClose }) {
           userId: currentUser?.uid || null,
           userEmail: currentUser?.email || null,
           status: 'pending',
-          createdAt: serverTimestamp(),
-        });
+          createdAt: new Date().toISOString(),
+        };
+        bookings.push(newBooking);
+        localStorage.setItem('bookings', JSON.stringify(bookings));
         setSaved(true);
       } catch (err) {
         console.error('Error saving booking:', err);
         setError('Booking saved locally. We will contact you shortly.');
         setSaved(true);
       }
-      setSaving(false);
+      
+      // Simulate network latency for the confirmation loader
+      timer = setTimeout(() => {
+        setSaving(false);
+      }, 600);
     };
     saveBooking();
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
   }, []);
 
   if (saving) {
