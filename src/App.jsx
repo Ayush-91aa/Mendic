@@ -8,19 +8,14 @@ import WhyChooseUs from './components/WhyChooseUs';
 import HowItWorks from './components/HowItWorks';
 import SEOSection from './components/SEOSection';
 import Footer from './components/Footer';
-import LoginModal from './components/LoginModal';
 import BookingModal from './components/BookingModal';
 
 function AppContent() {
-  const [loginOpen, setLoginOpen] = useState(false);
   const [bookingOpen, setBookingOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-white">
-      <Header
-        onOpenLogin={() => setLoginOpen(true)}
-        onOpenBooking={() => setBookingOpen(true)}
-      />
+      <Header onOpenBooking={() => setBookingOpen(true)} />
       <main>
         <HeroSection onOpenBooking={() => setBookingOpen(true)} />
         <TrustBanner />
@@ -31,7 +26,6 @@ function AppContent() {
       </main>
       <Footer />
 
-      <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} />
       <BookingModal isOpen={bookingOpen} onClose={() => setBookingOpen(false)} />
     </div>
   );
