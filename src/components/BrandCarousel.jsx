@@ -17,12 +17,13 @@ export default function BrandCarousel() {
           <div className="flex animate-marquee">
             {doubled.map((brand, i) => (
               <div key={`a-${i}`} className="flex-shrink-0 mx-4 md:mx-6">
-                <div className="w-28 md:w-36 h-20 md:h-24 bg-white rounded-xl border border-gray-100 shadow-sm flex items-center justify-center hover:shadow-md hover:border-primary-200 transition-all duration-300 group cursor-pointer">
-                  <div className="text-center">
-                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center mx-auto mb-1 transition-colors" style={{ backgroundColor: brand.color + '15' }}>
-                      <span className="text-lg md:text-xl font-bold" style={{ color: brand.color }}>{brand.name[0]}</span>
-                    </div>
-                    <span className="text-xs md:text-sm font-medium text-gray-600 group-hover:text-primary-500 transition-colors">{brand.name}</span>
+                <div className="w-28 md:w-36 h-20 md:h-24 bg-white rounded-xl border border-gray-100 shadow-sm flex items-center justify-center hover:shadow-md hover:border-primary-200 transition-all duration-300 group cursor-pointer px-4">
+                  <div className="w-16 h-16 md:w-24 md:h-24 flex items-center justify-center transition-colors rounded-xl mx-auto" style={{ backgroundColor: brand.logo ? 'transparent' : brand.color + '15' }}>
+                    {brand.logo ? (
+                      <img src={brand.logo} alt={brand.name} className="w-full h-full object-contain mix-blend-multiply" />
+                    ) : (
+                      <span className="text-2xl md:text-3xl font-bold" style={{ color: brand.color }}>{brand.name}</span>
+                    )}
                   </div>
                 </div>
               </div>

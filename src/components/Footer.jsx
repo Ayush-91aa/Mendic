@@ -66,7 +66,7 @@ export default function Footer() {
               <ul className="space-y-3">
                 <li className="flex items-start gap-2 text-gray-400 text-sm">
                   <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0 text-primary-400" />
-                  Jaipur, Delhi & Gurugram
+                  Jaipur
                 </li>
                 <li className="flex items-center gap-2 text-gray-400 text-sm">
                   <Phone className="w-4 h-4 flex-shrink-0 text-primary-400" />
@@ -74,7 +74,7 @@ export default function Footer() {
                 </li>
                 <li className="flex items-center gap-2 text-gray-400 text-sm">
                   <Mail className="w-4 h-4 flex-shrink-0 text-primary-400" />
-                  support@devicecure.in
+                  support@mendic.in
                 </li>
               </ul>
             </div>
@@ -96,7 +96,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="mt-12 pt-8 border-t border-gray-800 text-center">
           <p className="text-gray-500 text-sm">
-            © {new Date().getFullYear()} Devicecure. All rights reserved. Made with ❤️ in India.
+            © {new Date().getFullYear()} Mendic. All rights reserved. Made with ❤️ in India.
           </p>
         </div>
       </div>

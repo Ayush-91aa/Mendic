@@ -1,15 +1,15 @@
 export const brands = [
-  { id: 'apple', name: 'Apple', color: '#555555' },
-  { id: 'samsung', name: 'Samsung', color: '#1428A0' },
-  { id: 'oneplus', name: 'OnePlus', color: '#EB0028' },
-  { id: 'vivo', name: 'Vivo', color: '#415FFF' },
-  { id: 'oppo', name: 'Oppo', color: '#1A8B41' },
-  { id: 'xiaomi', name: 'Xiaomi', color: '#FF6900' },
-  { id: 'realme', name: 'Realme', color: '#FEBB02' },
-  { id: 'motorola', name: 'Motorola', color: '#5C2D91' },
-  { id: 'poco', name: 'Poco', color: '#FEBB02' },
+  { id: 'apple', name: 'Apple', color: '#555555', logo: '/logos/apple.png' },
+  { id: 'samsung', name: 'Samsung', color: '#1428A0', logo: '/logos/samsung.png' },
+  { id: 'oneplus', name: 'OnePlus', color: '#EB0028', logo: '/logos/oneplus.png' },
+  { id: 'vivo', name: 'Vivo', color: '#415FFF', logo: '/logos/vivo.png' },
+  { id: 'oppo', name: 'Oppo', color: '#1A8B41', logo: '/logos/oppo.png' },
+  { id: 'xiaomi', name: 'Xiaomi', color: '#FF6900', logo: '/logos/xiaomi.jpg' },
+  { id: 'realme', name: 'Realme', color: '#FEBB02', logo: '/logos/realme.svg' },
+  { id: 'motorola', name: 'Motorola', color: '#5C2D91', logo: '/logos/motorola.png' },
+  { id: 'poco', name: 'Poco', color: '#FEBB02', logo: '/logos/poco.png' },
   { id: 'nothing', name: 'Nothing', color: '#000000' },
-  { id: 'iqoo', name: 'iQOO', color: '#FF4500' },
+  { id: 'iqoo', name: 'iQOO', color: '#FF4500', logo: '/logos/iqoo.png' },
 ];
 
 export const models = {
