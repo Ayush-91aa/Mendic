@@ -1,0 +1,27 @@
+# Dependencies
+node_modules
+
+# Production build / Local state
+dist
+dist-ssr
+.wrangler
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Editor directories and files
+.vscode
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+# Cloudflare D1 / SQLite local databases
+.wrangler/
+*.sqlite
+*.sqlite3
+*.db
