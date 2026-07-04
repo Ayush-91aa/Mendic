@@ -68,8 +68,13 @@ export default {
           primaryEmail = found ? found.email_address : email_addresses[0].email_address;
         }
 
-        if (!id || !primaryEmail) {
-          return new Response(JSON.stringify({ error: 'Payload missing user ID or primary email address' }), {
+        // Fallback for Clerk dashboard test/example payloads or phone-only signups
+        if (!primaryEmail) {
+          primaryEmail = `test_${id}@clerk.mock`;
+        }
+
+        if (!id) {
+          return new Response(JSON.stringify({ error: 'Payload missing user ID' }), {
             status: 400,
             headers: { 'Content-Type': 'application/json' },
           });
