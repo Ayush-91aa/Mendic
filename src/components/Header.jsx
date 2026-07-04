@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { SignInButton, SignUpButton, Show, UserButton } from '@clerk/react';
+import { Link } from 'react-router-dom';
 import {
   Menu,
   X,
@@ -64,6 +65,13 @@ export default function Header({ onOpenBooking }) {
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center gap-3">
+            <Link
+              to="/mechanic/join"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-gray-300 text-gray-700 text-sm font-semibold hover:border-primary-500 hover:text-primary-500 hover:bg-primary-50/50 transition-all duration-200"
+            >
+              <Briefcase className="w-4 h-4 text-primary-500" />
+              <span>Work with us</span>
+            </Link>
             <Show when="signed-in">
               <UserButton afterSignOutUrl="/" />
             </Show>
@@ -107,7 +115,15 @@ export default function Header({ onOpenBooking }) {
                 <span className="font-medium">{link.name}</span>
               </a>
             ))}
-            <div className="pt-3 border-t border-gray-100 mt-3">
+            <div className="pt-3 border-t border-gray-100 mt-3 space-y-3">
+              <Link
+                to="/mechanic/join"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-gray-300 text-gray-700 hover:border-primary-500 hover:text-primary-500 hover:bg-primary-50/50 font-semibold transition-all text-sm"
+              >
+                <Briefcase className="w-4 h-4 text-primary-500" />
+                <span>Work with us (Technician Portal)</span>
+              </Link>
               <Show when="signed-in">
                 <div className="px-4 py-3 flex items-center justify-between">
                   <span className="font-semibold text-dark text-sm">My Account</span>
