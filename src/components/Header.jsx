@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { SignInButton, SignUpButton, Show, UserButton } from '@clerk/react';
 import {
   Menu,
   X,
@@ -9,9 +9,7 @@ import {
   Info,
   Briefcase,
   LogIn,
-  LogOut,
-  User,
-  ChevronDown,
+  UserPlus,
 } from 'lucide-react';
 
 const navLinks = [
@@ -22,10 +20,8 @@ const navLinks = [
   { name: 'Career', href: '#career', icon: Briefcase },
 ];
 
-export default function Header({ onOpenBooking, onOpenLogin }) {
+export default function Header({ onOpenBooking }) {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
-  const { currentUser, logout } = useAuth();
 
   const handleNavClick = (e, href) => {
     if (href === '#booking') {
@@ -34,15 +30,6 @@ export default function Header({ onOpenBooking, onOpenLogin }) {
       setMobileOpen(false);
     } else {
       setMobileOpen(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      setProfileOpen(false);
-    } catch (error) {
-      console.error('Logout error:', error);
     }
   };
 
@@ -77,50 +64,23 @@ export default function Header({ onOpenBooking, onOpenLogin }) {
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center gap-3">
-            {currentUser ? (
-              <div className="relative">
-                <button
-                  onClick={() => setProfileOpen(!profileOpen)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  <div className="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center text-white text-sm font-semibold">
-                    {currentUser.displayName?.[0]?.toUpperCase() || currentUser.email?.[0]?.toUpperCase() || 'U'}
-                  </div>
-                  <span className="text-sm font-medium text-dark max-w-[120px] truncate">
-                    {currentUser.displayName || currentUser.email?.split('@')[0]}
-                  </span>
-                  <ChevronDown className="w-4 h-4 text-muted" />
+            <Show when="signed-in">
+              <UserButton afterSignOutUrl="/" />
+            </Show>
+            <Show when="signed-out">
+              <SignInButton mode="modal">
+                <button className="flex items-center gap-2 px-4 py-2 rounded-xl border border-primary-500 text-primary-500 text-sm font-semibold hover:bg-primary-50 transition-all duration-200">
+                  <LogIn className="w-4 h-4" />
+                  Sign In
                 </button>
-                {profileOpen && (
-                  <>
-                    <div className="fixed inset-0 z-10" onClick={() => setProfileOpen(false)} />
-                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-20 animate-fade-in">
-                      <div className="px-4 py-2 border-b border-gray-50">
-                        <p className="text-sm font-semibold text-dark truncate">
-                          {currentUser.displayName || 'User'}
-                        </p>
-                        <p className="text-xs text-muted truncate">{currentUser.email}</p>
-                      </div>
-                      <button
-                        onClick={handleLogout}
-                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                      >
-                        <LogOut className="w-4 h-4" />
-                        Sign Out
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-            ) : (
-              <button
-                onClick={onOpenLogin}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-500 text-white text-sm font-semibold hover:bg-primary-600 transition-all duration-200 shadow-md shadow-primary-500/20"
-              >
-                <LogIn className="w-4 h-4" />
-                Login
-              </button>
-            )}
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <button className="flex items-center gap-2 px-5 py-2 rounded-xl bg-primary-500 text-white text-sm font-semibold hover:bg-primary-600 transition-all duration-200 shadow-md shadow-primary-500/20">
+                  <UserPlus className="w-4 h-4" />
+                  Sign Up
+                </button>
+              </SignUpButton>
+            </Show>
           </div>
 
           {/* Mobile Hamburger */}
@@ -148,40 +108,34 @@ export default function Header({ onOpenBooking, onOpenLogin }) {
               </a>
             ))}
             <div className="pt-3 border-t border-gray-100 mt-3">
-              {currentUser ? (
-                <div className="px-4 space-y-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-primary-500 rounded-full flex items-center justify-center text-white font-semibold">
-                      {currentUser.displayName?.[0]?.toUpperCase() || 'U'}
-                    </div>
-                    <div>
-                      <p className="font-semibold text-dark text-sm">
-                        {currentUser.displayName || 'User'}
-                      </p>
-                      <p className="text-xs text-muted">{currentUser.email}</p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={handleLogout}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-red-600 border border-red-200 hover:bg-red-50 font-medium text-sm transition-colors"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    Sign Out
-                  </button>
+              <Show when="signed-in">
+                <div className="px-4 py-3 flex items-center justify-between">
+                  <span className="font-semibold text-dark text-sm">My Account</span>
+                  <UserButton afterSignOutUrl="/" />
                 </div>
-              ) : (
-                <button
-                  onClick={() => {
-                    setMobileOpen(false);
-                    onOpenLogin();
-                  }}
-                  className="w-full flex items-center justify-center gap-2 mx-4 py-3 rounded-xl bg-primary-500 text-white font-semibold hover:bg-primary-600 transition-colors"
-                  style={{ width: 'calc(100% - 2rem)' }}
-                >
-                  <LogIn className="w-5 h-5" />
-                  Login
-                </button>
-              )}
+              </Show>
+              <Show when="signed-out">
+                <div className="flex items-center gap-3 px-4 py-2">
+                  <SignInButton mode="modal">
+                    <button
+                      onClick={() => setMobileOpen(false)}
+                      className="flex-1 py-2.5 rounded-xl border border-primary-500 text-primary-500 font-semibold text-sm hover:bg-primary-50 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <LogIn className="w-4 h-4" />
+                      Sign In
+                    </button>
+                  </SignInButton>
+                  <SignUpButton mode="modal">
+                    <button
+                      onClick={() => setMobileOpen(false)}
+                      className="flex-1 py-2.5 rounded-xl bg-primary-500 text-white font-semibold text-sm hover:bg-primary-600 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <UserPlus className="w-4 h-4" />
+                      Sign Up
+                    </button>
+                  </SignUpButton>
+                </div>
+              </Show>
             </div>
           </div>
         )}
