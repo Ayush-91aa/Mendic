@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Show } from '@clerk/react';
 import { AuthProvider } from './context/AuthContext';
 import Header from './components/Header';
 import HeroSection from './components/HeroSection';
@@ -9,8 +11,10 @@ import HowItWorks from './components/HowItWorks';
 import SEOSection from './components/SEOSection';
 import Footer from './components/Footer';
 import BookingModal from './components/BookingModal';
+import MechanicDashboard from './components/mechanic/MechanicDashboard';
+import MechanicAuth from './components/mechanic/MechanicAuth';
 
-function AppContent() {
+function LandingPage() {
   const [bookingOpen, setBookingOpen] = useState(false);
 
   return (
@@ -34,7 +38,30 @@ function AppContent() {
 export default function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <BrowserRouter>
+        <Routes>
+          {/* Landing Page Route */}
+          <Route path="/" element={<LandingPage />} />
+
+          {/* Dedicated Mechanic Auth Route */}
+          <Route path="/mechanic/join/*" element={<MechanicAuth />} />
+
+          {/* Protected Mechanic Portal Route */}
+          <Route
+            path="/mechanic/*"
+            element={
+              <>
+                <Show when="signed-in">
+                  <MechanicDashboard />
+                </Show>
+                <Show when="signed-out">
+                  <Navigate to="/mechanic/join" replace />
+                </Show>
+              </>
+            }
+          />
+        </Routes>
+      </BrowserRouter>
     </AuthProvider>
   );
 }
