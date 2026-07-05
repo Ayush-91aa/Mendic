@@ -16,9 +16,7 @@ import {
 const navLinks = [
   { name: 'Home', href: '#home', icon: Home },
   { name: 'Book A Repair', href: '#booking', icon: Wrench },
-  { name: 'Blog', href: '#blog', icon: FileText },
   { name: 'About', href: '#about', icon: Info },
-  { name: 'Career', href: '#career', icon: Briefcase },
 ];
 
 export default function Header({ onOpenBooking }) {
@@ -40,10 +38,7 @@ export default function Header({ onOpenBooking }) {
         <div className="flex items-center justify-between h-16 md:h-18">
           {/* Logo */}
           <a href="#home" className="flex items-center gap-2 flex-shrink-0">
-            <div className="w-9 h-9 bg-primary-500 rounded-xl flex items-center justify-center">
-              <Wrench className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-2xl font-nasalization tracking-wide" style={{ color: '#F45D40' }}>
+            <span className="text-3xl tracking-wide font-bold" style={{ fontFamily: 'Mokoto, sans-serif', color: '#0056b3' }}>
               MENDIC
             </span>
           </a>
@@ -57,7 +52,6 @@ export default function Header({ onOpenBooking }) {
                 onClick={(e) => handleNavClick(e, link.href)}
                 className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-primary-500 hover:bg-primary-50 transition-all duration-200"
               >
-                <link.icon className="w-4 h-4" />
                 {link.name}
               </a>
             ))}
@@ -111,7 +105,6 @@ export default function Header({ onOpenBooking }) {
                 onClick={(e) => handleNavClick(e, link.href)}
                 className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-500 transition-all"
               >
-                <link.icon className="w-5 h-5" />
                 <span className="font-medium">{link.name}</span>
               </a>
             ))}

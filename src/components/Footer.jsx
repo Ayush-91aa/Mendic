@@ -14,10 +14,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="space-y-4">
             <a href="#home" className="flex items-center gap-2">
-              <div className="w-9 h-9 bg-primary-500 rounded-xl flex items-center justify-center">
-                <Wrench className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-2xl font-nasalization tracking-wide" style={{ color: '#F45D40' }}>MENDIC</span>
+              <span className="text-3xl tracking-wide font-bold" style={{ fontFamily: 'Mokoto, sans-serif', color: '#0056b3' }}>MENDIC</span>
             </a>
             <p className="text-gray-400 text-sm leading-relaxed">
               India's trusted doorstep mobile phone repair service. Fast, reliable, and hassle-free repairs at your convenience.
@@ -40,7 +37,7 @@ export default function Footer() {
           <div>
             <h4 className="font-semibold text-lg mb-4">Quick Links</h4>
             <ul className="space-y-3">
-              {['About Us', 'Blog', 'Career', 'Contact Us', 'FAQs'].map(link => (
+              {['About Us', 'Contact Us', 'FAQs'].map(link => (
                 <li key={link}>
                   <a href="#" className="text-gray-400 text-sm hover:text-primary-400 transition-colors">{link}</a>
                 </li>

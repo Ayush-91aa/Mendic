@@ -25,6 +25,7 @@ export default {
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
         nasalization: ['Nasalization', '"Bruno Ace SC"', 'sans-serif'],
+        mokoto: ['Mokoto', 'sans-serif'],
       },
       animation: {
         'marquee': 'marquee 30s linear infinite',
