@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { UserButton } from '@clerk/react';
+import { useAuth } from '../../context/AuthContext';
 import { Wrench, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import MechanicVerificationForm from './MechanicVerificationForm';
@@ -7,7 +8,25 @@ import PendingApproval from './PendingApproval';
 import MechanicOrderFeed from './MechanicOrderFeed';
 
 export default function MechanicDashboard() {
-  const [mechanicStatus, setMechanicStatus] = useState('incomplete'); // Options: 'incomplete' | 'pending' | 'approved'
+  const [mechanicStatus, setMechanicStatus] = useState('incomplete'); // 'incomplete' | 'pending' | 'approved'
+  const { currentUser } = useAuth();
+
+  useEffect(() => {
+    if (currentUser?.uid) {
+      fetch(`https://mendic-api.mendic.workers.dev/api/mechanic/feed?userId=${currentUser.uid}`)
+        .then(r => r.json())
+        .then(res => {
+          if (res.success) {
+            if (res.verified) {
+              setMechanicStatus('approved');
+            } else if (res.mechanic || res.message?.includes('pending')) {
+              setMechanicStatus('pending');
+            }
+          }
+        })
+        .catch(err => console.error('Error checking mechanic status:', err));
+    }
+  }, [currentUser]);
 
   return (
     <div className="min-h-screen bg-gray-50/80 flex flex-col font-sans">
@@ -39,7 +58,6 @@ export default function MechanicDashboard() {
           </div>
 
           <div className="flex items-center gap-4">
-            {/* Read-Only Status Badge / Progress Indicator */}
             <div className="hidden md:flex items-center gap-2 bg-gray-50 px-3.5 py-2 rounded-2xl border border-gray-200/80 text-xs font-bold">
               <span className="text-muted">Account Status:</span>
               {mechanicStatus === 'incomplete' && (

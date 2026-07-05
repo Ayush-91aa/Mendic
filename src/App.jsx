@@ -13,6 +13,7 @@ import Footer from './components/Footer';
 import BookingModal from './components/BookingModal';
 import MechanicDashboard from './components/mechanic/MechanicDashboard';
 import MechanicAuth from './components/mechanic/MechanicAuth';
+import AdminDashboard from './components/admin/AdminDashboard';
 
 function LandingPage() {
   const [bookingOpen, setBookingOpen] = useState(false);
@@ -42,6 +43,9 @@ export default function App() {
         <Routes>
           {/* Landing Page Route */}
           <Route path="/" element={<LandingPage />} />
+
+          {/* Admin Control Center Route */}
+          <Route path="/admin/*" element={<AdminDashboard />} />
 
           {/* Dedicated Mechanic Auth Route */}
           <Route path="/mechanic/join/*" element={<MechanicAuth />} />
