@@ -1,7 +1,7 @@
 export default function SEOSection() {
   return (
     <section className="py-16 md:py-20 bg-white">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="prose prose-gray max-w-none">
           <h2 className="text-3xl font-bold text-dark mb-6">Welcome to Mendic</h2>
           <p className="text-muted leading-relaxed mb-6">

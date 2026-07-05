@@ -1,11 +1,16 @@
-import { Eye, Shield, Award, Zap } from 'lucide-react';
-
 const cards = [
-  { icon: Eye, title: 'Transparent Work', desc: 'Watch your device being repaired in front of you. No hidden charges, no surprises.' },
-  { icon: Shield, title: 'Warranty On Repairing', desc: 'Get up to 180-day warranty on all repairs. Your satisfaction is our priority.' },
-  { icon: Award, title: 'Certified Technician', desc: 'Our technicians are trained and certified to handle all types of phone repairs.' },
-  { icon: Zap, title: 'Quick Mobile Repairing', desc: 'Most repairs completed in 30-60 minutes. Get your phone back in no time.' },
+  { img: '/features/icon1.webp', title: 'Transparent Work', desc: 'Complete visibility of repair process', color: 'blue' },
+  { img: '/features/icon2.webp', title: 'Warranty On Repairing', desc: 'Guaranteed quality with warranty', color: 'green' },
+  { img: '/features/icon3.webp', title: 'Certified Technician', desc: 'Expert technicians you can trust', color: 'yellow' },
+  { img: '/features/icon4.webp', title: 'Quick Mobile Repairing', desc: 'Fast and efficient service', color: 'purple' },
 ];
+
+const colorClasses = {
+  blue: { bg: 'bg-blue-50', line: 'bg-blue-500' },
+  green: { bg: 'bg-green-50', line: 'bg-green-500' },
+  yellow: { bg: 'bg-yellow-50', line: 'bg-yellow-500' },
+  purple: { bg: 'bg-purple-50', line: 'bg-purple-500' },
+};
 
 export default function WhyChooseUs() {
   return (
@@ -16,12 +21,13 @@ export default function WhyChooseUs() {
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
           {cards.map((card, i) => (
-            <div key={card.title} className="card text-center group hover:-translate-y-1" style={{ animationDelay: `${i * 100}ms` }}>
-              <div className="w-14 h-14 bg-primary-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary-500 transition-colors duration-300">
-                <card.icon className="w-7 h-7 text-primary-500 group-hover:text-white transition-colors duration-300" />
+            <div key={card.title} className="bg-white rounded-2xl p-6 sm:p-8 text-center shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition-all duration-300 flex flex-col items-center border border-gray-100/50 hover:-translate-y-1">
+              <div className={`w-20 h-20 rounded-full flex items-center justify-center mb-6 ${colorClasses[card.color].bg}`}>
+                <img src={card.img} alt={card.title} className="w-10 h-10 object-contain mix-blend-multiply" />
               </div>
-              <h3 className="text-lg font-bold text-dark mb-2">{card.title}</h3>
-              <p className="text-sm text-muted leading-relaxed">{card.desc}</p>
+              <h3 className="text-lg font-bold text-gray-900 mb-3 leading-tight max-w-[150px] mx-auto">{card.title}</h3>
+              <p className="text-sm text-gray-500 mb-8 px-2">{card.desc}</p>
+              <div className={`w-8 h-1 rounded-full mt-auto ${colorClasses[card.color].line}`}></div>
             </div>
           ))}
         </div>
