@@ -94,7 +94,7 @@ export default function AdminDashboard() {
           <div className="space-y-3">
             <input
               type="password"
-              placeholder="Enter Admin Passphrase (MENDIC_ADMIN_2026)"
+              placeholder="Enter Admin Passphrase"
               value={passphrase}
               onChange={e => setPassphrase(e.target.value)}
               className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-center font-mono focus:border-primary-500 outline-none"
