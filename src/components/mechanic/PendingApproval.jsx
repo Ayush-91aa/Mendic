@@ -1,6 +1,6 @@
 import { Clock, ShieldCheck, CheckCircle2 } from 'lucide-react';
 
-export default function PendingApproval({ onSimulateApprove }) {
+export default function PendingApproval() {
   return (
     <div className="max-w-2xl mx-auto py-8">
       <div className="card bg-white rounded-3xl border border-gray-100 shadow-xl p-8 sm:p-12 text-center space-y-8 animate-slide-up">
@@ -61,19 +61,6 @@ export default function PendingApproval({ onSimulateApprove }) {
           <ShieldCheck className="w-5 h-5 text-primary-500 flex-shrink-0" />
           <span>Please check back here shortly—our admin team reviews KYC applications within a few hours.</span>
         </div>
-
-        {/* Demo/Testing Only: Simulate Admin Approval */}
-        {onSimulateApprove && (
-          <div className="pt-4 border-t border-gray-100/80">
-            <button
-              type="button"
-              onClick={onSimulateApprove}
-              className="text-xs text-muted hover:text-green-600 underline font-semibold transition-colors"
-            >
-              [Demo Only: Simulate Admin Approval & View Order Feed]
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );
