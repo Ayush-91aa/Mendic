@@ -16,12 +16,10 @@ export default function AdminDashboard() {
   const [mechanics, setMechanics] = useState([]);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [passphrase, setPassphrase] = useState('');
-  const [unlocked, setUnlocked] = useState(false);
   const [actionLoading, setActionLoading] = useState(null);
 
   const isAdmin = currentUser && (currentUser.role === 'admin' || ADMIN_EMAILS.includes(currentUser.email?.toLowerCase()));
-  const hasAccess = isAdmin || unlocked;
+  const hasAccess = Boolean(isAdmin);
 
   const fetchData = async () => {
     setLoading(true);
@@ -83,30 +81,15 @@ export default function AdminDashboard() {
   if (!hasAccess) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
-        <div className="card bg-white rounded-3xl p-8 max-w-md w-full text-center space-y-6 shadow-xl border border-gray-100">
-          <div className="w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto border border-amber-100">
-            <AlertCircle className="w-8 h-8 text-amber-500" />
+        <div className="card bg-white rounded-3xl p-8 max-w-md w-full text-center space-y-6 shadow-xl border border-gray-100 animate-slide-up">
+          <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto border border-red-100">
+            <AlertCircle className="w-8 h-8 text-red-500" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-dark">Restricted Access</h1>
-            <p className="text-sm text-muted mt-2">Logged in as <strong>{currentUser.email}</strong>.<br />Enter the Admin Passphrase to unlock marketplace controls.</p>
+            <h1 className="text-2xl font-bold text-dark">Access Denied</h1>
+            <p className="text-sm text-muted mt-2">Logged in as <strong>{currentUser.email}</strong>.<br />You do not have administrative privileges to access this portal.</p>
           </div>
-          <div className="space-y-3">
-            <input
-              type="password"
-              placeholder="Enter Admin Passphrase (MENDIC_ADMIN_2026)"
-              value={passphrase}
-              onChange={e => setPassphrase(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-center font-mono focus:border-primary-500 outline-none"
-            />
-            <button
-              onClick={() => { if (passphrase === 'MENDIC_ADMIN_2026') setUnlocked(true); else alert('Incorrect passphrase!'); }}
-              className="btn-primary w-full py-3 font-bold"
-            >
-              Unlock Dashboard
-            </button>
-          </div>
-          <Link to="/" className="inline-block text-xs text-muted hover:text-dark">← Back to Landing Page</Link>
+          <Link to="/" className="btn-primary w-full py-3.5 font-bold block text-center">Return to Landing Page</Link>
         </div>
       </div>
     );
