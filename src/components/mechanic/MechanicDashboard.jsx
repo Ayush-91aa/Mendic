@@ -92,9 +92,7 @@ export default function MechanicDashboard() {
         {mechanicStatus === 'incomplete' && (
           <MechanicVerificationForm onSubmitSuccess={() => setMechanicStatus('pending')} />
         )}
-        {mechanicStatus === 'pending' && (
-          <PendingApproval onSimulateApprove={() => setMechanicStatus('approved')} />
-        )}
+        {mechanicStatus === 'pending' && <PendingApproval />}
         {mechanicStatus === 'approved' && <MechanicOrderFeed />}
       </main>
     </div>
