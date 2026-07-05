@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import {
   Laptop,
   Smartphone,
@@ -9,43 +10,86 @@ import {
   DollarSign,
   AlertTriangle,
   ArrowUpRight,
-  ShieldAlert,
+  RefreshCw,
 } from 'lucide-react';
 
 const dummyOrders = [
   {
     id: 'ORD-8941',
-    deviceType: 'laptop',
-    deviceModel: 'MacBook Pro M1 (16-inch, 2021)',
-    issueDescription: 'Screen flickering and horizontal lines appearing after opening the hinge beyond 90 degrees. No external display issues.',
-    location: 'Indiranagar 100ft Road, Bangalore',
+    device_type: 'laptop',
+    brand: 'Apple',
+    model: 'MacBook Pro M1 (16-inch, 2021)',
+    issue_description: 'Screen flickering and horizontal lines appearing after opening the hinge beyond 90 degrees. No external display issues.',
+    address: 'Indiranagar 100ft Road, Bangalore',
     distance: '2.4 km away',
-    timeSlot: 'Today, 4:00 PM – 6:00 PM',
-    payout: '₹4,500 – ₹6,000',
+    time_slot: 'Today, 4:00 PM – 6:00 PM',
+    estimated_price: 5200,
     urgency: 'High Priority',
   },
   {
     id: 'ORD-8942',
-    deviceType: 'mobile',
-    deviceModel: 'iPhone 13 (128GB, Midnight)',
-    issueDescription: 'Severe battery degradation (Health at 68%). Rapid draining and unexpected shutdowns when charge drops below 30%.',
-    location: 'Koramangala 4th Block, Bangalore',
+    device_type: 'mobile',
+    brand: 'Apple',
+    model: 'iPhone 13 (128GB, Midnight)',
+    issue_description: 'Severe battery degradation (Health at 68%). Rapid draining and unexpected shutdowns when charge drops below 30%.',
+    address: 'Koramangala 4th Block, Bangalore',
     distance: '3.8 km away',
-    timeSlot: 'Tomorrow, 10:00 AM – 12:00 PM',
-    payout: '₹2,800',
+    time_slot: 'Tomorrow, 10:00 AM – 12:00 PM',
+    estimated_price: 2800,
     urgency: 'Standard',
   },
 ];
 
 export default function MechanicOrderFeed() {
+  const [orders, setOrders] = useState([]);
   const [acceptedOrders, setAcceptedOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const { currentUser } = useAuth();
 
-  const handleAccept = (id) => {
+  const fetchOrders = async () => {
+    setLoading(true);
+    try {
+      if (currentUser?.uid) {
+        const res = await fetch(`https://mendic-api.mendic.workers.dev/api/mechanic/feed?userId=${currentUser.uid}`).then(r => r.json());
+        if (res.success && res.orders && res.orders.length > 0) {
+          setOrders(res.orders);
+        } else {
+          setOrders(dummyOrders);
+        }
+      } else {
+        setOrders(dummyOrders);
+      }
+    } catch (err) {
+      console.error('Failed to fetch live orders:', err);
+      setOrders(dummyOrders);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchOrders();
+    const interval = setInterval(fetchOrders, 5000); // Live poll every 5s
+    return () => clearInterval(interval);
+  }, [currentUser]);
+
+  const handleAccept = async (id) => {
     setAcceptedOrders((prev) => [...prev, id]);
+    try {
+      if (currentUser?.uid && !id.startsWith('ORD-894')) {
+        await fetch(`https://mendic-api.mendic.workers.dev/api/orders/${id}/accept`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: currentUser.uid })
+        });
+      }
+    } catch (err) {
+      console.error('Error accepting job:', err);
+    }
   };
 
   return (
-    <div className="space-y-8 py-4">
+    <div className="space-y-8 py-4 animate-fade-in">
       {/* Feed Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 sm:p-8 rounded-3xl border border-gray-100 shadow-sm">
         <div>
@@ -53,7 +97,7 @@ export default function MechanicOrderFeed() {
             <h1 className="text-2xl sm:text-3xl font-extrabold text-dark">Live Repair Requests</h1>
             <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-sm">
               <span className="w-2 h-2 rounded-full bg-green-500 animate-ping" />
-              {dummyOrders.length - acceptedOrders.length} Live Jobs
+              {orders.length - acceptedOrders.length} Live Jobs
             </span>
           </div>
           <p className="text-sm text-muted mt-1">
@@ -62,6 +106,10 @@ export default function MechanicOrderFeed() {
         </div>
 
         <div className="flex items-center gap-3">
+          <button onClick={fetchOrders} className="p-2.5 rounded-2xl border border-gray-200 hover:bg-gray-50 text-gray-600 transition-all flex items-center gap-1.5 text-xs font-semibold">
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+            <span>Refresh Feed</span>
+          </button>
           <div className="px-4 py-2.5 rounded-2xl bg-gray-50 border border-gray-200 text-xs font-semibold text-dark flex items-center gap-2">
             <span className="text-muted">Radius:</span>
             <span className="text-primary-600 font-bold">10 km (Bangalore)</span>
@@ -71,8 +119,8 @@ export default function MechanicOrderFeed() {
 
       {/* Orders Grid */}
       <div className="grid grid-cols-1 gap-6">
-        {dummyOrders.map((order) => {
-          const isAccepted = acceptedOrders.includes(order.id);
+        {orders.map((order) => {
+          const isAccepted = acceptedOrders.includes(order.id) || order.status === 'accepted';
 
           return (
             <div
@@ -88,7 +136,7 @@ export default function MechanicOrderFeed() {
                     <span className="text-xs font-mono font-bold text-muted bg-gray-100 px-2.5 py-1 rounded-lg">
                       {order.id}
                     </span>
-                    {order.deviceType === 'laptop' ? (
+                    {order.device_type === 'laptop' ? (
                       <span className="px-3 py-1 bg-purple-50 text-purple-700 border border-purple-200 rounded-xl text-xs font-bold flex items-center gap-1.5">
                         <Laptop className="w-3.5 h-3.5" />
                         Laptop Repair
@@ -108,27 +156,29 @@ export default function MechanicOrderFeed() {
                   </div>
 
                   <div>
-                    <h3 className="text-xl sm:text-2xl font-bold text-dark">{order.deviceModel}</h3>
+                    <h3 className="text-xl sm:text-2xl font-bold text-dark">{order.brand} {order.model}</h3>
                     <p className="text-sm text-gray-600 mt-2 bg-gray-50 p-3.5 rounded-2xl border border-gray-100 leading-relaxed font-medium">
                       <span className="font-bold text-dark block text-xs uppercase tracking-wider mb-1 text-muted">
                         Reported Issue:
                       </span>
-                      {order.issueDescription}
+                      {order.issue_description}
                     </p>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-sm text-gray-700 font-medium">
                     <div className="flex items-center gap-2 text-gray-600">
                       <MapPin className="w-4 h-4 text-primary-500 flex-shrink-0" />
-                      <span>{order.location}</span>
-                      <span className="text-xs font-bold text-primary-600 bg-primary-50 px-2 py-0.5 rounded-md">
-                        {order.distance}
-                      </span>
+                      <span>{order.address}</span>
+                      {order.distance && (
+                        <span className="text-xs font-bold text-primary-600 bg-primary-50 px-2 py-0.5 rounded-md">
+                          {order.distance}
+                        </span>
+                      )}
                     </div>
 
                     <div className="flex items-center gap-2 text-gray-600">
                       <Clock className="w-4 h-4 text-primary-500 flex-shrink-0" />
-                      <span>{order.timeSlot}</span>
+                      <span>{order.time_slot}</span>
                     </div>
                   </div>
                 </div>
@@ -140,7 +190,7 @@ export default function MechanicOrderFeed() {
                       Estimated Payout
                     </span>
                     <span className="text-2xl sm:text-3xl font-extrabold text-green-600 tracking-tight block mt-1">
-                      {order.payout}
+                      ₹{order.estimated_price?.toLocaleString() || '4,500'}
                     </span>
                     <span className="text-[11px] text-muted block mt-0.5">Instant transfer via UPI</span>
                   </div>
