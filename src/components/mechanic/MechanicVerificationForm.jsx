@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import {
   User,
   Phone,
@@ -26,6 +27,7 @@ export default function MechanicVerificationForm({ onSubmitSuccess }) {
   });
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { currentUser } = useAuth();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -46,19 +48,34 @@ export default function MechanicVerificationForm({ onSubmitSuccess }) {
     setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setTimeout(() => {
+    try {
+      await fetch('https://mendic-api.mendic.workers.dev/api/mechanics/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: currentUser?.uid || 'user_' + Math.random().toString(36).substr(2, 9),
+          fullName: formData.fullName,
+          phone: formData.phone,
+          city: 'Bangalore',
+          experienceYears: 2,
+          specializations: formData.specialization || 'laptop',
+        }),
+      });
+    } catch (err) {
+      console.error('Error submitting KYC:', err);
+    } finally {
       setIsSubmitting(false);
       if (onSubmitSuccess) {
         onSubmitSuccess();
       }
-    }, 800);
+    }
   };
 
   return (
-    <div className="card bg-white rounded-2xl border border-gray-100 shadow-md p-6 sm:p-10 max-w-3xl mx-auto space-y-8">
+    <div className="card bg-white rounded-2xl border border-gray-100 shadow-md p-6 sm:p-10 max-w-3xl mx-auto space-y-8 animate-fade-in">
       {/* Title Header */}
       <div className="flex items-start gap-4 border-b border-gray-100 pb-6">
         <div className="w-12 h-12 bg-primary-50 rounded-2xl flex items-center justify-center flex-shrink-0 border border-primary-100">
@@ -254,7 +271,6 @@ export default function MechanicVerificationForm({ onSubmitSuccess }) {
             <p className="text-xs text-muted mt-1">PDF, DOCX, PNG, JPG (max. 10MB per file)</p>
           </div>
 
-          {/* File list */}
           {uploadedFiles.length > 0 && (
             <div className="space-y-2 pt-2">
               <p className="text-xs font-semibold text-dark">Uploaded Files ({uploadedFiles.length}):</p>
