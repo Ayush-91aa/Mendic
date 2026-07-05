@@ -145,6 +145,23 @@ export default {
            ON CONFLICT(user_id) DO UPDATE SET full_name = excluded.full_name, phone = excluded.phone, experience_years = excluded.experience_years, specializations = excluded.specializations`
         ).bind(mechId, userId, fullName, phone, city, experienceYears, specializations).run();
 
+        await env.DB.prepare("UPDATE users SET role = 'mechanic' WHERE id = ?").bind(userId).run();
+        if (env.CLERK_SECRET_KEY) {
+          await fetch(`https://api.clerk.com/v1/users/${userId}/metadata`, {
+            method: 'PATCH',
+            headers: {
+              'Authorization': `Bearer ${env.CLERK_SECRET_KEY}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              public_metadata: {
+                role: 'mechanic',
+                verification_status: 'pending'
+              }
+            })
+          }).catch(e => console.error('Failed to sync Clerk metadata:', e));
+        }
+
         return jsonResponse({ success: true, message: 'Application submitted successfully. Pending Admin verification.', mechanicId: mechId });
       } catch (err) {
         return jsonResponse({ error: 'Failed to submit application', details: err.message }, 500);
