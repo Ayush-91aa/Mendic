@@ -237,13 +237,16 @@ export default {
         return jsonResponse({ error: 'Missing userId parameter' }, 400);
       }
 
-      const mech = await env.DB.prepare("SELECT * FROM mechanics WHERE user_id = ? AND verification_status = 'verified'").bind(userId).first();
+      const mech = await env.DB.prepare("SELECT * FROM mechanics WHERE user_id = ?").bind(userId).first();
       if (!mech) {
-        return jsonResponse({ success: true, verified: false, message: 'Your profile is pending admin verification.', orders: [] });
+        return jsonResponse({ success: true, verified: false, status: 'incomplete', message: 'No KYC application found.', orders: [] });
+      }
+      if (mech.verification_status !== 'verified') {
+        return jsonResponse({ success: true, verified: false, status: 'pending', mechanic: mech, message: 'Your profile is pending admin verification.', orders: [] });
       }
 
       const { results } = await env.DB.prepare("SELECT * FROM orders WHERE status = 'searching_mechanic' ORDER BY created_at DESC").all();
-      return jsonResponse({ success: true, verified: true, mechanic: mech, orders: results || [] });
+      return jsonResponse({ success: true, verified: true, status: 'verified', mechanic: mech, orders: results || [] });
     }
 
     // Mechanic accepts an order

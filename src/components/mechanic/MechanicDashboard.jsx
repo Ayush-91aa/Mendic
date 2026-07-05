@@ -17,10 +17,12 @@ export default function MechanicDashboard() {
         .then(r => r.json())
         .then(res => {
           if (res.success) {
-            if (res.verified) {
+            if (res.verified || res.status === 'verified') {
               setMechanicStatus('approved');
-            } else if (res.mechanic || res.message?.includes('pending')) {
+            } else if (res.status === 'pending' || (res.mechanic && !res.verified)) {
               setMechanicStatus('pending');
+            } else {
+              setMechanicStatus('incomplete');
             }
           }
         })
