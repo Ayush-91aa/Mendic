@@ -89,6 +89,7 @@ export default {
         const role = ADMIN_EMAILS.includes(primaryEmail.toLowerCase()) ? 'admin' : 'customer';
 
         try {
+          await env.DB.prepare("DELETE FROM users WHERE email = ? AND id != ?").bind(primaryEmail, id).run();
           await env.DB.prepare(
             `INSERT INTO users (id, email, role, created_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)
              ON CONFLICT(id) DO UPDATE SET email = excluded.email, role = excluded.role`
