@@ -11,10 +11,20 @@ export function AuthProvider({ children }) {
   const { user, isLoaded } = useUser();
   const { signOut, openSignIn, openSignUp } = useClerk();
 
+  const email = user?.primaryEmailAddress?.emailAddress || '';
+  const isAdminEmail = [
+    'mendicindia@gmail.com',
+    'divyaprakashsinghchauhan1234@gmail.com',
+    'dpsc90071@gmail.com',
+    'modulusfunctio9@gmail.com'
+  ].includes(email.toLowerCase());
+
   const currentUser = user ? {
     uid: user.id,
-    email: user.primaryEmailAddress?.emailAddress || '',
+    email: email,
     displayName: user.fullName || user.firstName || user.username || '',
+    role: user.publicMetadata?.role || (isAdminEmail ? 'admin' : 'customer'),
+    verificationStatus: user.publicMetadata?.verification_status || null,
   } : null;
 
   const login = () => openSignIn();
