@@ -34,13 +34,29 @@ export default {
         });
       }
 
-      // 3. Get raw request body string (required by Svix for exact HMAC computation)
+      // 3. Clean secret (remove whitespace, newlines, quotes, or accidental prefixes from terminal paste)
+      let secret = env.CLERK_WEBHOOK_SECRET.trim().replace(/['"]/g, '').replace(/\s+/g, '');
+      const whsecIndex = secret.indexOf('whsec_');
+      if (whsecIndex !== -1) {
+        secret = secret.substring(whsecIndex);
+      }
+
+      // 4. Get raw request body string (required by Svix for exact HMAC computation)
       const payloadString = await request.text();
 
-      // 4. Verify webhook signature using Svix library
-      const wh = new Webhook(env.CLERK_WEBHOOK_SECRET);
-      let evt;
+      // 5. Verify webhook signature using Svix library
+      let wh;
+      try {
+        wh = new Webhook(secret);
+      } catch (err) {
+        console.error('Failed to initialize Svix Webhook with provided secret:', err.message);
+        return new Response(JSON.stringify({ error: 'Invalid CLERK_WEBHOOK_SECRET format on server', details: err.message }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
 
+      let evt;
       try {
         evt = wh.verify(payloadString, {
           'svix-id': svix_id,
