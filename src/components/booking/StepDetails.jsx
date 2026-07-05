@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { timeSlots } from '../../data/repairData';
-import { User, Phone, MapPin, Calendar, Clock, Loader2 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { User, Phone, MapPin, Calendar, Clock, Loader2, ShieldCheck, Lock } from 'lucide-react';
 
 export default function StepDetails({ booking, updateBooking, onNext }) {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+  const { currentUser, login } = useAuth();
 
   const validate = () => {
     const e = {};
@@ -20,6 +23,10 @@ export default function StepDetails({ booking, updateBooking, onNext }) {
 
   const handleSubmit = () => {
     if (!validate()) return;
+    if (!currentUser) {
+      setShowAuthPrompt(true);
+      return;
+    }
     setLoading(true);
     setTimeout(() => { setLoading(false); onNext(); }, 500);
   };
@@ -84,9 +91,33 @@ export default function StepDetails({ booking, updateBooking, onNext }) {
         </div>
       </div>
 
-      <button onClick={handleSubmit} disabled={loading} className="w-full btn-primary mt-6 flex items-center justify-center gap-2 disabled:opacity-60">
-        {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Confirm Booking'}
-      </button>
+      {showAuthPrompt && (
+        <div className="card bg-primary-50/80 border border-primary-200 p-5 rounded-2xl text-center space-y-3 mt-6 animate-slide-up">
+          <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center mx-auto shadow-sm text-primary-600 border border-primary-100">
+            <Lock className="w-5 h-5" />
+          </div>
+          <div>
+            <h4 className="text-sm font-bold text-dark">Authentication Required</h4>
+            <p className="text-xs text-muted mt-1 leading-relaxed">
+              Please log in or create a quick account to broadcast your repair order directly to verified mechanics and track arrival updates in real time.
+            </p>
+          </div>
+          <div className="flex gap-2 justify-center pt-1">
+            <button onClick={login} className="btn-primary py-2.5 px-6 text-xs font-bold shadow-md">
+              Log In / Sign Up Now
+            </button>
+            <button onClick={() => setShowAuthPrompt(false)} className="px-4 py-2 text-xs text-muted hover:text-dark">
+              Edit Details
+            </button>
+          </div>
+        </div>
+      )}
+
+      {!showAuthPrompt && (
+        <button onClick={handleSubmit} disabled={loading} className="w-full btn-primary mt-6 flex items-center justify-center gap-2 disabled:opacity-60 py-3.5 font-bold shadow-lg shadow-primary-500/25">
+          {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Confirm Booking'}
+        </button>
+      )}
     </div>
   );
 }
