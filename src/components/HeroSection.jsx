@@ -1,6 +1,16 @@
 import { CheckCircle, Shield, Award, Zap } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 export default function HeroSection({ onOpenBooking }) {
+  const [isFixed, setIsFixed] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsFixed((prev) => !prev);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <section id="home" className="relative overflow-hidden">
       {/* Background decoration */}
@@ -51,56 +61,28 @@ export default function HeroSection({ onOpenBooking }) {
 
           </div>
 
-          {/* Right Visual */}
+          {/* Right Visual - Animated Phone */}
           <div className="relative flex items-center justify-center animate-slide-in-right">
-            <div className="relative w-full max-w-md">
+            <div className="relative w-full max-w-sm mx-auto">
               {/* Glow effect */}
-              <div className="absolute inset-0 bg-gradient-to-br from-primary-300/30 to-primary-500/20 rounded-3xl blur-2xl scale-110" />
-              {/* Phone comparison */}
-              <div className="relative bg-gradient-to-br from-gray-50 to-white rounded-3xl p-8 border border-gray-100 shadow-xl">
-                <div className="grid grid-cols-2 gap-6 items-center">
-                  {/* Broken phone */}
-                  <div className="text-center space-y-3">
-                    <div className="w-28 h-48 mx-auto bg-gray-900 rounded-2xl border-4 border-gray-700 relative overflow-hidden shadow-lg">
-                      <div className="absolute inset-0 bg-gradient-to-br from-transparent via-gray-600/30 to-transparent" />
-                      <div className="absolute top-3 left-1/2 -translate-x-1/2 w-10 h-1.5 bg-gray-600 rounded-full" />
-                      {/* Crack lines */}
-                      <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 170">
-                        <path d="M20,0 L45,60 L30,80 L55,170" stroke="#ff4444" strokeWidth="2" fill="none" opacity="0.8" />
-                        <path d="M45,60 L70,50 L80,90" stroke="#ff4444" strokeWidth="1.5" fill="none" opacity="0.6" />
-                        <path d="M30,80 L15,120 L25,170" stroke="#ff4444" strokeWidth="1" fill="none" opacity="0.5" />
-                      </svg>
-                      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-8 h-8 border-2 border-gray-600 rounded-full" />
-                    </div>
-                    <p className="text-sm font-semibold text-red-500">Before</p>
-                  </div>
-
-                  {/* Arrow */}
-                  <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
-                    <div className="w-10 h-10 bg-primary-500 rounded-full flex items-center justify-center shadow-lg shadow-primary-500/30 animate-pulse-soft">
-                      <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                    </div>
-                  </div>
-
-                  {/* Fixed phone */}
-                  <div className="text-center space-y-3">
-                    <div className="w-28 h-48 mx-auto bg-gray-900 rounded-2xl border-4 border-gray-700 relative overflow-hidden shadow-lg">
-                      <div className="absolute inset-0 bg-gradient-to-br from-primary-500/20 to-blue-400/20" />
-                      <div className="absolute top-3 left-1/2 -translate-x-1/2 w-10 h-1.5 bg-gray-600 rounded-full" />
-                      <div className="absolute inset-4 top-8 flex flex-col items-center justify-center gap-2">
-                        <div className="w-8 h-8 bg-green-500/30 rounded-full flex items-center justify-center">
-                          <CheckCircle className="w-5 h-5 text-green-400" />
-                        </div>
-                        <div className="space-y-1.5 w-full">
-                          <div className="h-1.5 bg-gray-700 rounded-full w-full" />
-                          <div className="h-1.5 bg-gray-700 rounded-full w-3/4" />
-                          <div className="h-1.5 bg-primary-500/40 rounded-full w-1/2" />
-                        </div>
-                      </div>
-                      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-8 h-8 border-2 border-gray-600 rounded-full" />
-                    </div>
-                    <p className="text-sm font-semibold text-green-500">After</p>
-                  </div>
+              <div className="absolute inset-0 bg-gradient-to-br from-primary-300/40 to-primary-500/30 rounded-[3rem] blur-2xl scale-105" />
+              
+              {/* Image Container */}
+              <div className="relative shadow-2xl overflow-hidden aspect-[9/19] w-full max-w-[280px] mx-auto rounded-[2.5rem] bg-transparent">
+                {/* Dynamic Screen Images */}
+                <div className="relative w-full h-full bg-transparent">
+                   {/* Broken Screen (scaled to crop black padding) */}
+                   <img 
+                     src="/images/broken-screen.png" 
+                     alt="Broken Screen" 
+                     className={`absolute inset-0 w-full h-full object-cover scale-[1.4] object-center transition-opacity duration-1000 ${isFixed ? 'opacity-0' : 'opacity-100'}`} 
+                   />
+                   {/* Fixed Screen */}
+                   <img 
+                     src="/images/fixed-screen.png" 
+                     alt="Fixed Screen" 
+                     className={`absolute inset-0 w-full h-full object-cover scale-[1.4] object-center transition-opacity duration-1000 ${isFixed ? 'opacity-100' : 'opacity-0'}`} 
+                   />
                 </div>
               </div>
             </div>
