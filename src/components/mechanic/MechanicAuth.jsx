@@ -1,10 +1,17 @@
 import { useState } from 'react';
 import { SignIn, SignUp, Show } from '@clerk/react';
 import { Wrench, ArrowLeft, ShieldCheck, CheckCircle2, Award, Zap } from 'lucide-react';
-import { Link, Navigate } from 'react-router-dom';
+import { Link, Navigate, useSearchParams } from 'react-router-dom';
 
 export default function MechanicAuth() {
-  const [authMode, setAuthMode] = useState('sign-up'); // 'sign-in' or 'sign-up'
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialMode = searchParams.get('mode') === 'signin' ? 'sign-in' : 'sign-up';
+  const [authMode, setAuthMode] = useState(initialMode);
+
+  const handleModeChange = (mode) => {
+    setAuthMode(mode);
+    setSearchParams({ mode: mode === 'sign-in' ? 'signin' : 'signup' });
+  };
 
   return (
     <>
@@ -58,7 +65,7 @@ export default function MechanicAuth() {
               <div className="bg-gray-200/80 p-1 rounded-2xl flex items-center gap-1 text-xs font-bold border border-gray-300/50">
                 <button
                   type="button"
-                  onClick={() => setAuthMode('sign-up')}
+                  onClick={() => handleModeChange('sign-up')}
                   className={`px-5 py-2 rounded-xl transition-all ${
                     authMode === 'sign-up'
                       ? 'bg-white text-dark shadow-sm border border-gray-200/50'
@@ -69,7 +76,7 @@ export default function MechanicAuth() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setAuthMode('sign-in')}
+                  onClick={() => handleModeChange('sign-in')}
                   className={`px-5 py-2 rounded-xl transition-all ${
                     authMode === 'sign-in'
                       ? 'bg-white text-dark shadow-sm border border-gray-200/50'
@@ -88,12 +95,14 @@ export default function MechanicAuth() {
               {authMode === 'sign-up' ? (
                 <SignUp
                   routing="virtual"
+                  signInUrl="/mechanic/join?mode=signin"
                   forceRedirectUrl="/mechanic"
                   fallbackRedirectUrl="/mechanic"
                 />
               ) : (
                 <SignIn
                   routing="virtual"
+                  signUpUrl="/mechanic/join?mode=signup"
                   forceRedirectUrl="/mechanic"
                   fallbackRedirectUrl="/mechanic"
                 />
