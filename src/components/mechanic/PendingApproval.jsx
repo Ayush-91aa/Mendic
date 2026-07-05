@@ -59,7 +59,7 @@ export default function PendingApproval({ onSimulateApprove }) {
         {/* Reassurance Banner */}
         <div className="p-4 rounded-xl bg-primary-50/50 border border-primary-100 flex items-center justify-center gap-3 text-sm text-primary-700 font-medium">
           <ShieldCheck className="w-5 h-5 text-primary-500 flex-shrink-0" />
-          <span>We will notify you via SMS and Email once your account is approved.</span>
+          <span>Please check back here shortly—our admin team reviews KYC applications within a few hours.</span>
         </div>
 
         {/* Demo/Testing Only: Simulate Admin Approval */}
