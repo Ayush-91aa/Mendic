@@ -133,7 +133,8 @@ export default {
     if (url.pathname === '/api/mechanics/apply' && request.method === 'POST') {
       try {
         const body = await request.json();
-        const { userId, fullName, phone, city = 'Bangalore', experienceYears = 1, specializations = '' } = body;
+        const { userId, fullName, phone, city, address, experienceYears = 1, specializations = '' } = body;
+        const location = city || address || 'Bangalore';
 
         if (!userId || !fullName || !phone) {
           return jsonResponse({ error: 'Missing required fields' }, 400);
@@ -143,8 +144,8 @@ export default {
         await env.DB.prepare(
           `INSERT INTO mechanics (id, user_id, full_name, phone, city, experience_years, specializations, verification_status, created_at)
            VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', CURRENT_TIMESTAMP)
-           ON CONFLICT(user_id) DO UPDATE SET full_name = excluded.full_name, phone = excluded.phone, experience_years = excluded.experience_years, specializations = excluded.specializations`
-        ).bind(mechId, userId, fullName, phone, city, experienceYears, specializations).run();
+           ON CONFLICT(user_id) DO UPDATE SET full_name = excluded.full_name, phone = excluded.phone, city = excluded.city, experience_years = excluded.experience_years, specializations = excluded.specializations`
+        ).bind(mechId, userId, fullName, phone, location, experienceYears, specializations).run();
 
         await env.DB.prepare("UPDATE users SET role = 'mechanic' WHERE id = ?").bind(userId).run();
         if (env.CLERK_SECRET_KEY) {

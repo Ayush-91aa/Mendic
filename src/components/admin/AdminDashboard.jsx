@@ -195,7 +195,7 @@ export default function AdminDashboard() {
                     </div>
                     <div className="flex items-center gap-1.5">
                       <MapPin className="w-3.5 h-3.5 text-primary-500" />
-                      <span>{mech.city || 'Bangalore'}</span>
+                      <span>{mech.city || mech.address || 'Bangalore'}</span>
                     </div>
                   </div>
 
