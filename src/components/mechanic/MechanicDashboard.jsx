@@ -9,12 +9,15 @@ import MechanicOrderFeed from './MechanicOrderFeed';
 
 export default function MechanicDashboard() {
   const [mechanicStatus, setMechanicStatus] = useState('incomplete'); // 'incomplete' | 'pending' | 'approved'
-  const { currentUser } = useAuth();
+  const { currentUser, getToken } = useAuth();
 
   useEffect(() => {
     if (currentUser?.uid) {
-      fetch(`https://mendic-api.mendic.workers.dev/api/mechanic/feed?userId=${currentUser.uid}`)
-        .then(r => r.json())
+      getToken().then(token => {
+        fetch(`https://mendic-api.mendic.workers.dev/api/mechanic/feed?userId=${currentUser.uid}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+          .then(r => r.json())
         .then(res => {
           if (res.success) {
             if (res.verified || res.status === 'verified') {
@@ -27,6 +30,7 @@ export default function MechanicDashboard() {
           }
         })
         .catch(err => console.error('Error checking mechanic status:', err));
+      });
     }
   }, [currentUser]);
 
