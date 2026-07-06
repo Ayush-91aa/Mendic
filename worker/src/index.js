@@ -1,5 +1,5 @@
 import { Webhook } from 'svix';
-import { authenticateRequest } from './auth.js';
+import { authenticateRequest, verifyTurnstileToken, checkRateLimit } from './auth.js';
 
 const ADMIN_EMAILS = [
   'mendicindia@gmail.com',
@@ -176,9 +176,18 @@ async function handleRoute(request, env, ctx) {
     // ---------------------------------------------------------
     if (url.pathname === '/api/mechanics/apply' && request.method === 'POST') {
       try {
+        const rl = await checkRateLimit(request, env);
+        if (!rl.allowed) return jsonResponse({ error: rl.message }, rl.status);
+
         const body = await request.json();
-        const { userId, fullName, phone, city, address, experienceYears = 1, specializations = '' } = body;
+        const { userId, fullName, phone, city, address, experienceYears = 1, specializations = '', turnstileToken } = body;
         const location = city || address || 'Bangalore';
+
+        const ip = request?.headers?.get('cf-connecting-ip') || '127.0.0.1';
+        const isHuman = await verifyTurnstileToken(turnstileToken, env.TURNSTILE_SECRET_KEY, ip);
+        if (!isHuman) {
+          return jsonResponse({ error: 'CAPTCHA verification failed. Please try again.' }, 403);
+        }
 
         if (!userId || !fullName || !phone) {
           return jsonResponse({ error: 'Missing required fields' }, 400);
@@ -264,11 +273,20 @@ async function handleRoute(request, env, ctx) {
     // ---------------------------------------------------------
     if (url.pathname === '/api/orders' && request.method === 'POST') {
       try {
+        const rl = await checkRateLimit(request, env);
+        if (!rl.allowed) return jsonResponse({ error: rl.message }, rl.status);
+
         const body = await request.json();
         const {
           customerId, customerName, customerPhone, customerEmail, address,
-          deviceType = 'laptop', brand, model, issueDescription, estimatedPrice = 0, timeSlot = 'As soon as possible'
+          deviceType = 'laptop', brand, model, issueDescription, estimatedPrice = 0, timeSlot = 'As soon as possible', turnstileToken
         } = body;
+
+        const ip = request?.headers?.get('cf-connecting-ip') || '127.0.0.1';
+        const isHuman = await verifyTurnstileToken(turnstileToken, env.TURNSTILE_SECRET_KEY, ip);
+        if (!isHuman) {
+          return jsonResponse({ error: 'CAPTCHA verification failed. Please try again.' }, 403);
+        }
 
         if (!customerName || !customerPhone || !address || !model) {
           return jsonResponse({ error: 'Missing required order details' }, 400);

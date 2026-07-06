@@ -51,3 +51,57 @@ export async function authenticateRequest(request, env) {
     return null;
   }
 }
+
+/**
+ * Verifies a Cloudflare Turnstile token against the /siteverify API.
+ * @param {string} token The cf-turnstile-response token from frontend
+ * @param {string} secretKey The TURNSTILE_SECRET_KEY from worker env
+ * @param {string} [ip] Optional client IP
+ * @returns {Promise<boolean>} True if verification succeeds
+ */
+export async function verifyTurnstileToken(token, secretKey, ip) {
+  if (!token || !secretKey) {
+    return !secretKey ? true : false;
+  }
+
+  try {
+    const formData = new FormData();
+    formData.append('secret', secretKey);
+    formData.append('response', token);
+    if (ip) formData.append('remoteip', ip);
+
+    const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      body: formData,
+    });
+    const data = await res.json();
+    return !!data.success;
+  } catch (err) {
+    console.error('Turnstile verification error:', err);
+    return false;
+  }
+}
+
+/**
+ * Checks Cloudflare rate limiting binding if configured.
+ * @param {Request} request
+ * @param {Object} env
+ * @returns {Promise<{allowed: boolean, status: number, message?: string}>}
+ */
+export async function checkRateLimit(request, env) {
+  if (!env.RATE_LIMITER) {
+    return { allowed: true, status: 200 };
+  }
+
+  try {
+    const ip = request?.headers?.get('cf-connecting-ip') || '127.0.0.1';
+    const { success } = await env.RATE_LIMITER.limit({ key: ip });
+    if (!success) {
+      return { allowed: false, status: 429, message: 'Too Many Requests: Please slow down and try again later.' };
+    }
+    return { allowed: true, status: 200 };
+  } catch (err) {
+    console.error('Rate limit check error:', err);
+    return { allowed: true, status: 200 };
+  }
+}
