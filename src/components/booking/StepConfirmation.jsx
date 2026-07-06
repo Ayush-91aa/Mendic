@@ -55,7 +55,8 @@ export default function StepConfirmation({ booking, onClose }) {
             model: booking.model || '',
             issueDescription: booking.issues.map(i => i.name).join(', '),
             estimatedPrice: booking.totalPrice || 0,
-            timeSlot: booking.timeSlot || 'As soon as possible'
+            timeSlot: booking.timeSlot || 'As soon as possible',
+            turnstileToken: booking.turnstileToken
           }),
         }).then(r => r.json());
 

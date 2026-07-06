@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { timeSlots } from '../../data/repairData';
 import { useAuth } from '../../context/AuthContext';
 import { User, Phone, MapPin, Calendar, Clock, Loader2, ShieldCheck, Lock } from 'lucide-react';
+import TurnstileWidget from '../common/TurnstileWidget';
 
 export default function StepDetails({ booking, updateBooking, onNext }) {
   const [errors, setErrors] = useState({});
@@ -17,6 +18,7 @@ export default function StepDetails({ booking, updateBooking, onNext }) {
     if (!booking.address?.trim()) e.address = 'Address is required';
     if (!booking.date) e.date = 'Select a date';
     if (!booking.timeSlot) e.timeSlot = 'Select a time slot';
+    if (!booking.turnstileToken) e.turnstileToken = 'Please complete CAPTCHA verification';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -112,6 +114,11 @@ export default function StepDetails({ booking, updateBooking, onNext }) {
           </div>
         </div>
       )}
+
+      <div className="mt-4">
+        <TurnstileWidget onVerify={(token) => { updateBooking({ turnstileToken: token }); setErrors(p => ({ ...p, turnstileToken: '' })); }} />
+        {errors.turnstileToken && <p className="text-red-500 text-xs mt-1 text-center font-semibold">{errors.turnstileToken}</p>}
+      </div>
 
       {!showAuthPrompt && (
         <button onClick={handleSubmit} disabled={loading} className="w-full btn-primary mt-6 flex items-center justify-center gap-2 disabled:opacity-60 py-3.5 font-bold shadow-lg shadow-primary-500/25">

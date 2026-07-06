@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import TurnstileWidget from '../common/TurnstileWidget';
 import {
   User,
   Phone,
@@ -27,6 +28,7 @@ export default function MechanicVerificationForm({ onSubmitSuccess }) {
   });
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState(null);
   const { currentUser, getToken } = useAuth();
 
   const handleChange = (e) => {
@@ -50,10 +52,14 @@ export default function MechanicVerificationForm({ onSubmitSuccess }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!turnstileToken) {
+      alert('Please complete the CAPTCHA verification to proceed.');
+      return;
+    }
     setIsSubmitting(true);
     try {
       const token = await getToken();
-      await fetch('https://mendic-api.mendic.workers.dev/api/mechanics/apply', {
+      const res = await fetch('https://mendic-api.mendic.workers.dev/api/mechanics/apply', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -67,10 +73,16 @@ export default function MechanicVerificationForm({ onSubmitSuccess }) {
           address: formData.address,
           experienceYears: 2,
           specializations: formData.specialization || 'laptop',
+          turnstileToken,
         }),
-      });
+      }).then(r => r.json());
+      if (res && res.error) {
+        alert(res.error);
+        return;
+      }
     } catch (err) {
       console.error('Error submitting KYC:', err);
+      alert('Failed to submit application. Please try again.');
     } finally {
       setIsSubmitting(false);
       if (onSubmitSuccess) {
@@ -311,6 +323,9 @@ export default function MechanicVerificationForm({ onSubmitSuccess }) {
             By submitting this form, you authorize Mendic to verify your government identity credentials and background history. Your personal data is encrypted and processed securely.
           </p>
         </div>
+
+        {/* Turnstile CAPTCHA */}
+        <TurnstileWidget onVerify={(token) => setTurnstileToken(token)} />
 
         {/* Submit Button */}
         <button
