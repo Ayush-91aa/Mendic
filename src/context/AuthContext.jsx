@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react';
-import { useUser, useClerk } from '@clerk/react';
+import { useUser, useClerk, useAuth as useClerkAuth } from '@clerk/react';
 
 const AuthContext = createContext();
 
@@ -10,6 +10,7 @@ export function useAuth() {
 export function AuthProvider({ children }) {
   const { user, isLoaded } = useUser();
   const { signOut, openSignIn, openSignUp } = useClerk();
+  const { getToken } = useClerkAuth();
 
   const email = user?.primaryEmailAddress?.emailAddress || '';
   const isAdminEmail = [
@@ -34,6 +35,7 @@ export function AuthProvider({ children }) {
 
   const value = {
     currentUser,
+    getToken,
     signup,
     login,
     loginWithGoogle,

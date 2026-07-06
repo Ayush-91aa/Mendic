@@ -11,7 +11,7 @@ const ADMIN_EMAILS = [
 ];
 
 export default function AdminDashboard() {
-  const { currentUser, login } = useAuth();
+  const { currentUser, login, getToken } = useAuth();
   const [activeTab, setActiveTab] = useState('mechanics'); // 'mechanics' | 'orders'
   const [mechanics, setMechanics] = useState([]);
   const [orders, setOrders] = useState([]);
@@ -25,9 +25,11 @@ export default function AdminDashboard() {
     setLoading(true);
     try {
       const API_BASE = 'https://mendic-api.mendic.workers.dev';
+      const token = await getToken();
+      const headers = { 'Authorization': `Bearer ${token}` };
       const [mechRes, ordRes] = await Promise.all([
-        fetch(`${API_BASE}/api/admin/mechanics`).then(r => r.json()),
-        fetch(`${API_BASE}/api/admin/orders`).then(r => r.json())
+        fetch(`${API_BASE}/api/admin/mechanics`, { headers }).then(r => r.json()),
+        fetch(`${API_BASE}/api/admin/orders`, { headers }).then(r => r.json())
       ]);
       if (mechRes.success) setMechanics(mechRes.mechanics);
       if (ordRes.success) setOrders(ordRes.orders);
@@ -47,8 +49,10 @@ export default function AdminDashboard() {
   const handleVerifyMechanic = async (mechId) => {
     setActionLoading(mechId);
     try {
+      const token = await getToken();
       const res = await fetch(`https://mendic-api.mendic.workers.dev/api/admin/mechanics/${mechId}/verify`, {
         method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${token}` }
       }).then(r => r.json());
       if (res.success) {
         setMechanics(prev => prev.map(m => m.id === mechId ? { ...m, verification_status: 'verified' } : m));

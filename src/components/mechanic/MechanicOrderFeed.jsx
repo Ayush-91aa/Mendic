@@ -44,13 +44,16 @@ export default function MechanicOrderFeed() {
   const [orders, setOrders] = useState([]);
   const [acceptedOrders, setAcceptedOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { currentUser } = useAuth();
+  const { currentUser, getToken } = useAuth();
 
   const fetchOrders = async () => {
     setLoading(true);
     try {
       if (currentUser?.uid) {
-        const res = await fetch(`https://mendic-api.mendic.workers.dev/api/mechanic/feed?userId=${currentUser.uid}`).then(r => r.json());
+        const token = await getToken();
+        const res = await fetch(`https://mendic-api.mendic.workers.dev/api/mechanic/feed?userId=${currentUser.uid}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }).then(r => r.json());
         if (res.success && res.orders && res.orders.length > 0) {
           setOrders(res.orders);
         } else {
@@ -77,9 +80,13 @@ export default function MechanicOrderFeed() {
     setAcceptedOrders((prev) => [...prev, id]);
     try {
       if (currentUser?.uid && !id.startsWith('ORD-894')) {
+        const token = await getToken();
         await fetch(`https://mendic-api.mendic.workers.dev/api/orders/${id}/accept`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
           body: JSON.stringify({ userId: currentUser.uid })
         });
       }

@@ -27,7 +27,7 @@ export default function MechanicVerificationForm({ onSubmitSuccess }) {
   });
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { currentUser } = useAuth();
+  const { currentUser, getToken } = useAuth();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -52,9 +52,13 @@ export default function MechanicVerificationForm({ onSubmitSuccess }) {
     e.preventDefault();
     setIsSubmitting(true);
     try {
+      const token = await getToken();
       await fetch('https://mendic-api.mendic.workers.dev/api/mechanics/apply', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({
           userId: currentUser?.uid || 'user_' + Math.random().toString(36).substr(2, 9),
           fullName: formData.fullName,

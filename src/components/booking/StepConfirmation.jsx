@@ -8,7 +8,7 @@ export default function StepConfirmation({ booking, onClose }) {
   const [assignedMechanic, setAssignedMechanic] = useState(null);
   const [orderId, setOrderId] = useState(null);
   const [error, setError] = useState('');
-  const { currentUser } = useAuth();
+  const { currentUser, getToken } = useAuth();
 
   useEffect(() => {
     let pollTimer;
@@ -37,9 +37,13 @@ export default function StepConfirmation({ booking, onClose }) {
         localStorage.setItem('bookings', JSON.stringify(bookings));
 
         // Post to remote live Worker API
+        const token = await getToken();
         const res = await fetch('https://mendic-api.mendic.workers.dev/api/orders', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
           body: JSON.stringify({
             customerId: currentUser?.uid || null,
             customerName: booking.name,
@@ -78,7 +82,10 @@ export default function StepConfirmation({ booking, onClose }) {
     if (!saving && currentUser?.uid && orderStatus === 'searching_mechanic') {
       const checkStatus = async () => {
         try {
-          const res = await fetch(`https://mendic-api.mendic.workers.dev/api/orders/user/${currentUser.uid}`).then(r => r.json());
+          const token = await getToken();
+          const res = await fetch(`https://mendic-api.mendic.workers.dev/api/orders/user/${currentUser.uid}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          }).then(r => r.json());
           if (res.success && res.orders && res.orders.length > 0) {
             const latest = res.orders[0];
             if (latest.status === 'accepted') {
