@@ -8,12 +8,6 @@ const ADMIN_EMAILS = [
   'modulusfunctio9@gmail.com'
 ];
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization, svix-id, svix-timestamp, svix-signature',
-};
-
 const DEFAULT_ALLOWED_ORIGINS = [
   'https://mendic-web.pages.dev',
   'http://localhost:5173',
@@ -43,20 +37,39 @@ export function getCorsHeaders(request, env) {
 function jsonResponse(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json' },
   });
 }
 
 export default {
   async fetch(request, env, ctx) {
-    const url = new URL(request.url);
+    const corsHeaders = getCorsHeaders(request, env);
 
     // Handle CORS preflight OPTIONS request
     if (request.method === 'OPTIONS') {
       return new Response(null, { status: 204, headers: corsHeaders });
     }
 
-    // Health Check Endpoint
+    const response = await handleRoute(request, env, ctx);
+    
+    // Attach dynamic CORS headers to every response
+    const newHeaders = new Headers(response.headers);
+    Object.entries(corsHeaders).forEach(([key, value]) => {
+      newHeaders.set(key, value);
+    });
+
+    return new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers: newHeaders
+    });
+  },
+};
+
+async function handleRoute(request, env, ctx) {
+  const url = new URL(request.url);
+
+  // Health Check Endpoint
     if (url.pathname === '/' || url.pathname === '/api/health') {
       return jsonResponse({ status: 'ok', service: 'mendic-api marketplace worker' });
     }
@@ -350,5 +363,4 @@ export default {
 
     // 404
     return jsonResponse({ error: 'Not Found' }, 404);
-  },
-};
+}
