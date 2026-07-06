@@ -1,4 +1,5 @@
 import { Webhook } from 'svix';
+import { authenticateRequest } from './auth.js';
 
 const ADMIN_EMAILS = [
   'mendicindia@gmail.com',
@@ -119,7 +120,11 @@ export default {
     // 2. User & Auth Profile Routes
     // ---------------------------------------------------------
     if (url.pathname.startsWith('/api/user/') && request.method === 'GET') {
+      const session = await authenticateRequest(request, env);
       const userId = url.pathname.split('/')[3];
+      if (!session) return jsonResponse({ error: 'Unauthorized: Authentication required' }, 401);
+      if (session.userId !== userId && session.role !== 'admin') return jsonResponse({ error: 'Forbidden: Cannot access another user profile' }, 403);
+
       const user = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(userId).first();
       if (!user) {
         return jsonResponse({ error: 'User not found' }, 404);
@@ -172,12 +177,18 @@ export default {
 
     // Admin: Get all mechanics
     if (url.pathname === '/api/admin/mechanics' && request.method === 'GET') {
+      const session = await authenticateRequest(request, env);
+      if (!session || session.role !== 'admin') return jsonResponse({ error: 'Forbidden: Admin privileges required' }, 403);
+
       const { results } = await env.DB.prepare('SELECT * FROM mechanics ORDER BY created_at DESC').all();
       return jsonResponse({ success: true, mechanics: results || [] });
     }
 
     // Admin: Verify Mechanic
     if (url.pathname.startsWith('/api/admin/mechanics/') && url.pathname.endsWith('/verify') && request.method === 'PATCH') {
+      const session = await authenticateRequest(request, env);
+      if (!session || session.role !== 'admin') return jsonResponse({ error: 'Forbidden: Admin privileges required' }, 403);
+
       const mechId = url.pathname.split('/')[4];
       try {
         const mech = await env.DB.prepare('SELECT * FROM mechanics WHERE id = ?').bind(mechId).first();
@@ -238,23 +249,33 @@ export default {
 
     // Get orders for customer
     if (url.pathname.startsWith('/api/orders/user/') && request.method === 'GET') {
+      const session = await authenticateRequest(request, env);
       const customerId = url.pathname.split('/')[4];
+      if (!session) return jsonResponse({ error: 'Unauthorized: Authentication required' }, 401);
+      if (session.userId !== customerId && session.role !== 'admin') return jsonResponse({ error: 'Forbidden: Cannot access another user orders' }, 403);
+
       const { results } = await env.DB.prepare('SELECT * FROM orders WHERE customer_id = ? ORDER BY created_at DESC').bind(customerId).all();
       return jsonResponse({ success: true, orders: results || [] });
     }
 
     // Admin: Get all orders
     if (url.pathname === '/api/admin/orders' && request.method === 'GET') {
+      const session = await authenticateRequest(request, env);
+      if (!session || session.role !== 'admin') return jsonResponse({ error: 'Forbidden: Admin privileges required' }, 403);
+
       const { results } = await env.DB.prepare('SELECT * FROM orders ORDER BY created_at DESC').all();
       return jsonResponse({ success: true, orders: results || [] });
     }
 
     // Verified Mechanic Feed: Get open orders
     if (url.pathname === '/api/mechanic/feed' && request.method === 'GET') {
+      const session = await authenticateRequest(request, env);
       const userId = url.searchParams.get('userId');
       if (!userId) {
         return jsonResponse({ error: 'Missing userId parameter' }, 400);
       }
+      if (!session) return jsonResponse({ error: 'Unauthorized: Authentication required' }, 401);
+      if (session.userId !== userId && session.role !== 'admin') return jsonResponse({ error: 'Forbidden: Cannot access another mechanic feed' }, 403);
 
       const mech = await env.DB.prepare("SELECT * FROM mechanics WHERE user_id = ?").bind(userId).first();
       if (!mech) {
@@ -270,11 +291,15 @@ export default {
 
     // Mechanic accepts an order
     if (url.pathname.startsWith('/api/orders/') && url.pathname.endsWith('/accept') && request.method === 'POST') {
+      const session = await authenticateRequest(request, env);
+      if (!session) return jsonResponse({ error: 'Unauthorized: Authentication required' }, 401);
+
       const orderId = url.pathname.split('/')[3];
       try {
         const body = await request.json();
         const { userId } = body;
         if (!userId) return jsonResponse({ error: 'Missing mechanic userId' }, 400);
+        if (session.userId !== userId && session.role !== 'admin') return jsonResponse({ error: 'Forbidden: Cannot accept order on behalf of another mechanic' }, 403);
 
         const mech = await env.DB.prepare("SELECT * FROM mechanics WHERE user_id = ? AND verification_status = 'verified'").bind(userId).first();
         if (!mech) return jsonResponse({ error: 'Only verified mechanics can accept orders' }, 403);
