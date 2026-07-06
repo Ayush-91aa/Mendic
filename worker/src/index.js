@@ -14,6 +14,32 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization, svix-id, svix-timestamp, svix-signature',
 };
 
+const DEFAULT_ALLOWED_ORIGINS = [
+  'https://mendic-web.pages.dev',
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://127.0.0.1:5173'
+];
+
+export function getCorsHeaders(request, env) {
+  const origin = request?.headers?.get('Origin');
+  let allowedOrigins = [...DEFAULT_ALLOWED_ORIGINS];
+  
+  if (env && env.ALLOWED_ORIGINS) {
+    const envOrigins = env.ALLOWED_ORIGINS.split(',').map(o => o.trim()).filter(Boolean);
+    allowedOrigins = [...allowedOrigins, ...envOrigins];
+  }
+
+  const allowedOrigin = (origin && allowedOrigins.includes(origin)) ? origin : allowedOrigins[0];
+
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, svix-id, svix-timestamp, svix-signature',
+    'Access-Control-Allow-Credentials': 'true',
+  };
+}
+
 function jsonResponse(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
