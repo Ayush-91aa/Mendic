@@ -80,14 +80,14 @@ export default function MechanicVerificationForm({ onSubmitSuccess }) {
         alert(res.error);
         return;
       }
+      if (onSubmitSuccess) {
+        onSubmitSuccess();
+      }
     } catch (err) {
       console.error('Error submitting KYC:', err);
       alert('Failed to submit application. Please try again.');
     } finally {
       setIsSubmitting(false);
-      if (onSubmitSuccess) {
-        onSubmitSuccess();
-      }
     }
   };
 

@@ -27,18 +27,35 @@ export async function authenticateRequest(request, env) {
       return null;
     }
 
+const ADMIN_EMAILS = [
+  'mendicindia@gmail.com',
+  'divyaprakashsinghchauhan1234@gmail.com',
+  'dpsc90071@gmail.com',
+  'modulusfunctio9@gmail.com'
+];
+
     // Resolve user role from JWT claims or fallback to D1 database lookup
     let role = payload.public_metadata?.role || payload.metadata?.role || payload.role;
     
+    const email = payload.email || payload.email_address || payload?.primaryEmailAddress?.emailAddress || '';
+    let isAdmin = ADMIN_EMAILS.includes(email.toLowerCase());
+
     if (!role && env.DB) {
       try {
-        const dbUser = await env.DB.prepare('SELECT role FROM users WHERE id = ?').bind(payload.sub).first();
+        const dbUser = await env.DB.prepare('SELECT role, email FROM users WHERE id = ?').bind(payload.sub).first();
         if (dbUser && dbUser.role) {
           role = dbUser.role;
+        }
+        if (dbUser && dbUser.email && ADMIN_EMAILS.includes(dbUser.email.toLowerCase())) {
+          isAdmin = true;
         }
       } catch (dbErr) {
         console.error('Error looking up user role in D1:', dbErr);
       }
+    }
+
+    if (isAdmin) {
+      role = 'admin';
     }
 
     return {

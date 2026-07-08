@@ -8,6 +8,13 @@ export default function TurnstileWidget({
 }) {
   const containerRef = useRef(null);
   const widgetIdRef = useRef(null);
+  const onVerifyRef = useRef(onVerify);
+  const onErrorRef = useRef(onError);
+
+  useEffect(() => {
+    onVerifyRef.current = onVerify;
+    onErrorRef.current = onError;
+  }, [onVerify, onError]);
 
   useEffect(() => {
     // 1. Ensure Cloudflare Turnstile script is loaded with explicit render mode
@@ -25,22 +32,22 @@ export default function TurnstileWidget({
     let checkTimer;
     const renderWidget = () => {
       if (window.turnstile && containerRef.current && widgetIdRef.current === null) {
-        try {
-          widgetIdRef.current = window.turnstile.render(containerRef.current, {
-            sitekey,
-            action,
-            callback: (token) => {
-              if (onVerify) onVerify(token);
-            },
-            'error-callback': (err) => {
-              console.error('Turnstile widget error:', err);
-              if (onError) onError(err);
-            },
-            theme: 'dark'
-          });
-        } catch (e) {
-          console.error('Failed to render Turnstile widget:', e);
-        }
+         try {
+           widgetIdRef.current = window.turnstile.render(containerRef.current, {
+             sitekey,
+             action,
+             callback: (token) => {
+               if (onVerifyRef.current) onVerifyRef.current(token);
+             },
+             'error-callback': (err) => {
+               console.error('Turnstile widget error:', err);
+               if (onErrorRef.current) onErrorRef.current(err);
+             },
+             theme: 'dark'
+           });
+         } catch (e) {
+           console.error('Failed to render Turnstile widget:', e);
+         }
       } else if (!window.turnstile) {
         checkTimer = setTimeout(renderWidget, 100);
       }
@@ -60,7 +67,7 @@ export default function TurnstileWidget({
         }
       }
     };
-  }, [sitekey, action, onVerify, onError]);
+  }, [sitekey, action]);
 
   return <div ref={containerRef} className="my-3 flex justify-center" data-action={action} />;
 }

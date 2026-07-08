@@ -24,7 +24,7 @@ export function getCorsHeaders(request, env) {
     allowedOrigins = [...allowedOrigins, ...envOrigins];
   }
 
-  const allowedOrigin = (origin && allowedOrigins.includes(origin)) ? origin : allowedOrigins[0];
+  const allowedOrigin = (origin && (allowedOrigins.includes(origin) || origin.endsWith('.mendic-web.pages.dev'))) ? origin : allowedOrigins[0];
 
   return {
     'Access-Control-Allow-Origin': allowedOrigin,
@@ -197,10 +197,10 @@ async function handleRoute(request, env, ctx) {
         await env.DB.prepare(
           `INSERT INTO mechanics (id, user_id, full_name, phone, city, experience_years, specializations, verification_status, created_at)
            VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', CURRENT_TIMESTAMP)
-           ON CONFLICT(user_id) DO UPDATE SET full_name = excluded.full_name, phone = excluded.phone, city = excluded.city, experience_years = excluded.experience_years, specializations = excluded.specializations`
+           ON CONFLICT(user_id) DO UPDATE SET full_name = excluded.full_name, phone = excluded.phone, city = excluded.city, experience_years = excluded.experience_years, specializations = excluded.specializations, verification_status = 'pending', created_at = CURRENT_TIMESTAMP`
         ).bind(mechId, userId, fullName, phone, location, experienceYears, specializations).run();
 
-        await env.DB.prepare("UPDATE users SET role = 'mechanic' WHERE id = ?").bind(userId).run();
+        await env.DB.prepare("UPDATE users SET role = 'mechanic' WHERE id = ? AND role != 'admin'").bind(userId).run();
         if (env.CLERK_SECRET_KEY) {
           await fetch(`https://api.clerk.com/v1/users/${userId}/metadata`, {
             method: 'PATCH',
