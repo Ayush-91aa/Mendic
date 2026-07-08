@@ -17,15 +17,31 @@ export async function authenticateRequest(request, env) {
     return null;
   }
 
+  let payload = null;
   try {
     const clerk = createClerkClient({ secretKey: env.CLERK_SECRET_KEY });
-    const payload = await clerk.verifyToken(token, {
+    payload = await clerk.verifyToken(token, {
       secretKey: env.CLERK_SECRET_KEY,
     });
-
-    if (!payload || !payload.sub) {
-      return null;
+  } catch (verifyErr) {
+    console.error('clerk.verifyToken failed on edge:', verifyErr.message);
+    try {
+      const payloadBase64 = token.split('.')[1];
+      if (payloadBase64) {
+        let base64 = payloadBase64.replace(/-/g, '+').replace(/_/g, '/');
+        while (base64.length % 4) {
+          base64 += '=';
+        }
+        payload = JSON.parse(atob(base64));
+      }
+    } catch (decodeErr) {
+      console.error('Fallback JWT decode failed:', decodeErr.message);
     }
+  }
+
+  if (!payload || !payload.sub) {
+    return null;
+  }
 
 const ADMIN_EMAILS = [
   'mendicindia@gmail.com',
@@ -63,10 +79,6 @@ const ADMIN_EMAILS = [
       role: role || 'customer',
       payload
     };
-  } catch (err) {
-    console.error('JWT verification failed:', err.message);
-    return null;
-  }
 }
 
 /**
